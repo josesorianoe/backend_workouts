@@ -1,11 +1,5 @@
-const fs = require("fs");
+const utils = require("../utils/utils");
 const DB = require("./db.json");
-
-const saveToDatabase = (DB) => {
-  fs.writeFileSync("./src/database/db.json", JSON.stringify(DB, null, 2), {
-    encoding: "utf8"
-  })
-}
 
 const getAllWorkouts = (filterParams = {}) => {
   try {
@@ -65,7 +59,7 @@ const createNewWorkout = (workoutToInsert) => {
 
   try {
     DB.workouts.push(workoutToInsert);
-    saveToDatabase(DB);
+    utils.saveToDatabase(DB);
     return workoutToInsert;
   } catch (error) {
     throw { status: 500, message: error?.message || error }
@@ -75,15 +69,6 @@ const createNewWorkout = (workoutToInsert) => {
 
 const updateOneWorkout = (workoutId, changes) => {
   try {
-    const isAlreadyAdded = DB.workouts.findIndex((workout) => workout.name === changes.name) > -1
-
-    if (isAlreadyAdded) {
-      throw {
-        status: 400,
-        message: `Ya existe un workout con el nombre ${changes.name}`
-      }
-    }
-
     const indexForUpdate = DB.workouts.findIndex((workout) => workout.id === workoutId)
 
     if (indexForUpdate === -1) {
@@ -100,7 +85,7 @@ const updateOneWorkout = (workoutId, changes) => {
     }
 
     DB.workouts[indexForUpdate] = updatedWorkout;
-    saveToDatabase(DB);
+    utils.saveToDatabase(DB);
     return updatedWorkout;
   } catch (error) {
     throw {status: error?.status || 500, message: error?.message || error}
@@ -113,15 +98,15 @@ const deleteOneWorkout = (workoutId) => {
     if (index === -1) {
       throw {
         status: 400,
-        message: `No se encuentra un workout con el nombre ${workoutToInsert.name}`
+        message: `No se encuentra el workout con el id ${workoutId}`
       }
     }
   
     DB.workouts.splice(index, 1);
   
-    DB.records = DB.records.filter((r) => r.workout !== workoutId);
+    DB.records = DB.records.filter((record) => record.workout !== workoutId);
   
-    saveToDatabase(DB);
+    utils.saveToDatabase(DB);
   } catch (error) {
     throw {status: error?.status || 500, message: error?.message || error}
   }
